@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: influxdb
+    spec:
+      containers:
+      - image: influxdb:alpine
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/influxdb
+        - name: influxdb
+          mountPath: /var/lib/influxdb
+      volumes:
+      - name: config-volume
+        configMap:
+          name: influxdb-config
+      - name: influxdb
+        emptyDir: {}

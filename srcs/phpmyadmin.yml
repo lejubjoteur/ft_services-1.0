@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phpmyadmin
+  labels:
+    app: wordpress
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: phpmyadmin
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: phpmyadmin
+    spec:
+      containers:
+      - name: phpmyadmin
+        image: my-phpmyadmin:1.1
+        imagePullPolicy: Never
+        env:
+          - name: PMA_HOST
+            value: mysql
+          - name: PMA_DB
+            value: mysql
+          - name: PMA_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysql-pass
+                key: password
+        ports:
+        - containerPort: 80
+          name: phpmyadmin
+        volumeMounts:
+        - name: pma-persistent-storage
+          mountPath: /var/www/html
+      volumes:
+      - name: pma-persistent-storage
+        persistentVolumeClaim:
+          claimName: pma-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: phpmyadmin
+  labels:
+    app: wordpress
+spec:
+  type: LoadBalancer
+  selector:
+    app: wordpress
+    tier: phpmyadmin
+  ports:
+  - protocol: TCP
+    port: 5000
+    targetPort: 80
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pma-pv-claim
+  labels:
+    app: wordpress
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

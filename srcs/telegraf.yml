@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: telegraf
+spec:
+  template:
+    metadata:
+      labels:
+        app: telegraf
+    spec:
+      containers:
+        - name: telegraf
+          image: telegraf:alpine
+          imagePullPolicy: Always
