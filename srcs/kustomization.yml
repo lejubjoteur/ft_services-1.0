@@ -8,3 +8,5 @@ resources:
   - phpmyadmin.yml
   - wordpress.yml
   - grafana.yml
+  - influxdb.yml
+  - telegraf.yml

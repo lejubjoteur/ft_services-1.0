@@ -40,12 +40,12 @@ spec:
           requests: 
             memory: "1Gi"
             cpu: "500m"
-        volumeMounts:
-          - mountPath: /var/lib/grafana
-            name: grafana-storage
-          - mountPath: /etc/grafana/provisioning/datasources
-            name: grafana-datasources
-            readOnly: false
+        # volumeMounts:
+        #   - mountPath: /var/lib/grafana
+        #     name: grafana-storage
+        #   - mountPath: /etc/grafana/provisioning/datasources
+        #     name: grafana-datasources
+        #     readOnly: false
       volumes:
         - name: grafana-storage
           emptyDir: {}
@@ -64,4 +64,5 @@ spec:
     app: grafana
   type: LoadBalancer  
   ports:
-    - port: 3000
+    - port: 80
+      targetPort: 3000
