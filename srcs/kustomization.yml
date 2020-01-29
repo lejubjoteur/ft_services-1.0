@@ -2,6 +2,10 @@ secretGenerator:
 - name: mysql-pass
   literals:
   - password=password
+configMapGenerator:
+- name: telegraf-config
+  files:
+    - grafana/telegraf.conf
 resources:
   - nginx.yml
   - mysql.yml
@@ -10,3 +14,5 @@ resources:
   - grafana.yml
   - influxdb.yml
   - telegraf.yml
+  - ingress.yml
+  - ftps.yml

@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ftps
+  labels:
+    app: ftps
+spec:
+  selector:
+    matchLabels:
+      app: ftps
+      tier: ftps
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ftps
+        tier: ftps
+    spec:
+      restartPolicy: Always
+      containers:
+      - name: ftps
+        image: myftps
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 21
+          hostPort: 21
+          name: "ftps"
+        env:
+        - name: FTP_USER
+          value: "user"
+        - name: FTP_PASS
+          value: "password"
+        volumeMounts:
+        - mountPath: "/home/vsftpd"
+          name: ftps-persistant-storage
+      volumes:
+      - name: ftps-persistant-storage
+        # persistentVolumeClaim:
+        #   claimName: ftps-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ftps
+  labels:
+    app: ftps
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 21
+      name: ftps
+  selector:
+    app: ftps
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ftps-pv-claim
+  labels:
+    app: ftps
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi

@@ -18,6 +18,7 @@ spec:
         app: wordpress
         tier: phpmyadmin
     spec:
+      restartPolicy: Always
       containers:
       - name: phpmyadmin
         image: my-phpmyadmin:1.1

@@ -1,19 +1,89 @@
 apiVersion: apps/v1
-kind: Deployement
+kind: Deployment
 metadata:
   name: telegraf
   labels:
-      app: telegraf
+    app: telegraf
 spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: telegraf
   template:
     metadata:
       labels:
-        app: telegraf
-  containers:
-    - name: telegraf
-      image: telegraf:alpine
-      imagePullPolicy: Always
-  # volumes:
-  #   - name: telegraf-config
-  #     configMap:
-  #       name: telegraf-config
+        name: telegraf
+    spec:
+      restartPolicy: Always
+      serviceAccountName: telegraf-account
+      containers:
+      - name: telegraf
+        image: telegraf:alpine
+        env:
+        - name: HOSTNAME
+          value: "telegraf-polling-service"
+        volumeMounts:
+        - name: config
+          mountPath: /etc/telegraf
+      volumes:
+      - name: config
+        configMap:
+          name: telegraf-config
+--- 
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata: 
+  name: telegraf-role
+rules: 
+  - 
+    apiGroups: 
+      - ""
+    resources: 
+      - pods
+      - nodes
+      - deployments
+      - services
+      - persistentvolumes
+      - persistentvolumeclaims
+      - ingresses
+      - statefulsets
+      - daemonsets
+      - endpoints
+    verbs: 
+      - get
+      - list
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: telegraf-rolebinding
+subjects:
+  - kind: ServiceAccount
+    name: telegraf-account
+    namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: telegraf-role
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: telegraf
+  labels:
+    name: telegraf
+spec:
+  selector:
+    name: telegraf
+  clusterIP: None
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: telegraf-account
+  labels:
+    app: telegraf
